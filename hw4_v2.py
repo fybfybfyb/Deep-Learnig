@@ -38,7 +38,7 @@ checkpoint = ModelCheckpoint("model_weights.h5", monitor='val_acc', verbose=1, s
 callbacks_list = [checkpoint]
 class_weight = {0: 20.0, 1: 50.0, 2: 20.0, 3: 50.0, 4: 1.2, 5: 1.0, 6: 20.0, 7: 20.0}
 
-#Main CNN model with four Convolution layer & two fully connected layer
+#Improved AlexNet CNN model with 10 Convolution layer & two fully connected layer
 def my_model():
 	#model = Sequential()
 	inputs = Input(shape=(64,64,1))
@@ -47,10 +47,12 @@ def my_model():
 	cov1 = (BatchNormalization(axis=3))(cov1)
 	cov1 = (Activation('relu'))(cov1)
 	
+	# 2nd Convolutional Layer
 	cov2 = (Conv2D(filters=96, kernel_size=(3,3), padding='same',kernel_initializer = glorot_uniform(seed=0)))(cov1)
 	cov2 = (BatchNormalization(axis=3))(cov2)
 	cov2 = (Activation('relu'))(cov2)
 	
+	# 3rd Convolutional Layer
 	cov3 = (Conv2D(filters=96,  kernel_size=(3,3), padding='same',kernel_initializer = glorot_uniform(seed=0)))(cov2)
 	cov3 = (BatchNormalization(axis=3))(cov3)
 	cov3 = (Activation('relu'))(cov3)
@@ -58,38 +60,42 @@ def my_model():
 	max1 = (MaxPooling2D(pool_size=(4,4), strides=(2,2), padding='valid'))(cov3)
 	max1 = (Dropout(0.5))(max1)
 
-	# 2nd Convolutional Layer
+	# 4th Convolutional Layer
 	cov4 = (Conv2D(filters=256, kernel_size=(5,5), strides=(2,2), padding='same',kernel_initializer = glorot_uniform(seed=0)))(max1)
 	cov4 = (BatchNormalization(axis=3))(cov4)
 	cov4 = (Activation('relu'))(cov4)
 	# Max Pooling
 	max2 = (MaxPooling2D(pool_size=(3,3), strides=(2,2), padding='valid'))(cov4)
 	max2 = (Dropout(0.5))(max2)
-
-	# 3rd Convolutional Layer
+	
+	# 5th Convolutional Layer
 	cov5 = (Conv2D(filters=384, kernel_size=(3,1), strides=(1,1), padding='same',kernel_initializer = glorot_uniform(seed=0)))(max2)
 	cov5 = (BatchNormalization(axis=3))(cov5)
 	cov5 = (Activation('relu'))(cov5)
 	
+	# 6th Convolutional Layer
 	cov6 = (Conv2D(filters=384, kernel_size=(1,3), strides=(1,1), padding='same',kernel_initializer = glorot_uniform(seed=0)))(max2)
 	cov6 = (BatchNormalization(axis=3))(cov1)
 	cov6 = (Activation('relu'))(cov5)
 	concatenated1 = concatenate([cov5, cov6])
-	# 4th Convolutional Layer
+	
+	# 7th Convolutional Layer
 	cov7 = (Conv2D(filters=384, kernel_size=(3,1), strides=(1,1), padding='same',kernel_initializer = glorot_uniform(seed=0)))(concatenated1)
 	cov7 = (BatchNormalization(axis=3))(cov7)
 	cov7 = (Activation('relu'))(cov7)
 	
+	# 8th Convolutional Layer
 	cov8 = (Conv2D(filters=384, kernel_size=(1,3), strides=(1,1), padding='same',kernel_initializer = glorot_uniform(seed=0)))(concatenated1)
 	cov8 = (BatchNormalization(axis=3))(cov8)
 	cov8 = (Activation('relu'))(cov8)
 	concatenated2 = concatenate([cov7, cov8])
 	
-	# 5th Convolutional Layer
+	# 9th Convolutional Layer
 	cov9 = (Conv2D(filters=256, kernel_size=(3,1), strides=(1,1), padding='same',kernel_initializer = glorot_uniform(seed=0)))(concatenated2)
 	cov9 = (BatchNormalization(axis=3))(cov9)
 	cov9 = (Activation('relu'))(cov9)
 	
+	# 10th Convolutional Layer
 	cov10 = (Conv2D(filters=256, kernel_size=(1,3), strides=(1,1), padding='same',kernel_initializer = glorot_uniform(seed=0)))(concatenated2)
 	cov10 = (BatchNormalization(axis=3))(cov10)
 	cov10 = (Activation('relu'))(cov10)
@@ -127,7 +133,7 @@ model = my_model()
 print(model.summary())
 
 
-#Generate augmented data
+#Generate augmented data using online augumentation in keras.
 train_datagen = ImageDataGenerator(rescale=1./255,
 	rotation_range=30,
     width_shift_range=0.2,  
